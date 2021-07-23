@@ -9,6 +9,8 @@ interface AuthContextProps {
   googleLogin?: () => Promise<void>;
   logout?: () => Promise<void>;
   isLoading?: boolean;
+  login?: (email: string, password: string) => Promise<void>;
+  signUp?: (email: string, password: string) => Promise<void>;
 }
 
 const COOKIE_NAME = "admin-template-anderson-auth";
@@ -56,13 +58,39 @@ export function AuthProvider(props) {
     }
   };
 
+  const login = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const response = await firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password);
+      await setSession(response.user);
+      route.push("/");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const response = await firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password);
+      await setSession(response.user);
+      route.push("/");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const googleLogin = async () => {
     try {
       setLoading(true);
       const response = await firebase
         .auth()
         .signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      setSession(response.user);
+      await setSession(response.user);
       route.push("/");
     } finally {
       setLoading(false);
@@ -97,6 +125,8 @@ export function AuthProvider(props) {
         googleLogin,
         logout,
         isLoading,
+        login,
+        signUp,
       }}
     >
       {props.children}

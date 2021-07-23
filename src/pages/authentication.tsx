@@ -5,20 +5,22 @@ import { WarnIcon } from "../components/icons";
 import useAuth from "../data/hook/useAuth";
 
 export default function Authentication() {
-  const { user, googleLogin } = useAuth();
+  const { login, signUp, googleLogin } = useAuth();
 
   const [error, setError] = useState(null);
   const [mode, setMode] = useState<"login" | "signUp">("login");
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
 
-  const submit = () => {
-    if (mode === "login") {
-      console.log("login");
-      showError("Ocorreu um erro no login");
-    } else {
-      console.log("Cadastrar");
-      showError("Ocorreu um erro no cadastro");
+  const submit = async () => {
+    try {
+      if (mode === "login") {
+        await login(email, password);
+      } else {
+        await signUp(email, password);
+      }
+    } catch (e) {
+      showError(e?.message ?? "Erro desconhecido");
     }
   };
 
@@ -70,8 +72,8 @@ export default function Authentication() {
         <AuthInput
           label="Senha"
           type="password"
-          value={senha}
-          onChangeValue={setSenha}
+          value={password}
+          onChangeValue={setPassword}
           required
         />
         <button
